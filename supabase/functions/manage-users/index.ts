@@ -13,15 +13,23 @@ Deno.serve(async (req) => {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
+  const createErrorResponse = (message: string, detail?: any, status = 400) => {
+    const responseBody: Record<string, any> = { error: message };
+    if (detail !== undefined) {
+      responseBody.detail = detail;
+    }
+    return new Response(JSON.stringify(responseBody), {
+      status,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  };
+
   try {
     // Get the JWT token from the authorization header
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
       console.error('No authorization header');
-      return new Response(
-        JSON.stringify({ error: 'No authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return createErrorResponse('No authorization header', null, 401);
     }
 
     const token = authHeader.replace('Bearer ', '');
@@ -78,6 +86,7 @@ Deno.serve(async (req) => {
 
     // Parse request body
     const body = await req.json();
+    console.log('Request body:', body);
     const { action, fullName, username, password, role, userId, registrationId, canEditData, canDeleteData, canLunasData } = body;
 
     console.log('Action requested:', action);
@@ -102,9 +111,9 @@ Deno.serve(async (req) => {
 
       if (authError || !authData.user) {
         console.error('Error creating auth user:', authError);
-        return new Response(
-          JSON.stringify({ error: authError?.message || 'Failed to create user' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        return createErrorResponse(
+          authError?.message || 'Failed to create user',
+          { authError, authData }
         );
       }
 
@@ -123,10 +132,7 @@ Deno.serve(async (req) => {
       if (profileError) {
         console.error('Error creating profile:', profileError);
         await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-        return new Response(
-          JSON.stringify({ error: 'Failed to create profile' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        return createErrorResponse('Failed to create profile', profileError);
       }
 
       console.log('Profile created for user:', authData.user.id);
@@ -142,10 +148,7 @@ Deno.serve(async (req) => {
       if (roleCreateError) {
         console.error('Error creating role:', roleCreateError);
         await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-        return new Response(
-          JSON.stringify({ error: 'Failed to create role' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        return createErrorResponse('Failed to create role', roleCreateError);
       }
 
       console.log('Role created for user:', authData.user.id);
@@ -178,9 +181,9 @@ Deno.serve(async (req) => {
 
       if (authError || !authData.user) {
         console.error('Error creating auth user for registration:', authError);
-        return new Response(
-          JSON.stringify({ error: authError?.message || 'Failed to create user' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        return createErrorResponse(
+          authError?.message || 'Failed to create user',
+          { authError, authData }
         );
       }
 
@@ -196,10 +199,7 @@ Deno.serve(async (req) => {
       if (profileError) {
         console.error('Error creating profile for registration:', profileError);
         await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-        return new Response(
-          JSON.stringify({ error: 'Failed to create profile for registration' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        return createErrorResponse('Failed to create profile for registration', profileError);
       }
 
       const { error: roleCreateError } = await supabaseAdmin
@@ -212,10 +212,7 @@ Deno.serve(async (req) => {
       if (roleCreateError) {
         console.error('Error creating role for registration:', roleCreateError);
         await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-        return new Response(
-          JSON.stringify({ error: 'Failed to create role for registration' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        return createErrorResponse('Failed to create role for registration', roleCreateError);
       }
 
       const { error: updateError } = await supabaseAdmin

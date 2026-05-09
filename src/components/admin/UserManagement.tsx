@@ -76,6 +76,12 @@ export const UserManagement = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
+  const getErrorMessage = (error: any) => {
+    if (!error) return 'Unknown error';
+    if (error.details) return `${error.message || 'Error'}: ${JSON.stringify(error.details)}`;
+    return error.message || String(error);
+  };
+
   // Form state
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
@@ -120,7 +126,7 @@ export const UserManagement = () => {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message,
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     }
@@ -163,7 +169,7 @@ export const UserManagement = () => {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message,
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     } finally {
@@ -192,7 +198,7 @@ export const UserManagement = () => {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message,
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     }
@@ -245,7 +251,7 @@ export const UserManagement = () => {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message,
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     } finally {
