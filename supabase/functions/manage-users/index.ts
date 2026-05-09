@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
 
     // Parse request body
     const body = await req.json();
-    const { action, fullName, username, password, role, userId, canEditData, canDeleteData, canLunasData } = body;
+    const { action, fullName, username, password, role, userId, registrationId, canEditData, canDeleteData, canLunasData } = body;
 
     console.log('Action requested:', action);
 
@@ -120,7 +120,6 @@ Deno.serve(async (req) => {
 
       if (profileError) {
         console.error('Error creating profile:', profileError);
-        // Cleanup: delete the auth user if profile creation fails
         await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
         return new Response(
           JSON.stringify({ error: 'Failed to create profile' }),
@@ -140,7 +139,6 @@ Deno.serve(async (req) => {
 
       if (roleCreateError) {
         console.error('Error creating role:', roleCreateError);
-        // Cleanup: delete the auth user (cascade will delete profile)
         await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
         return new Response(
           JSON.stringify({ error: 'Failed to create role' }),
@@ -156,6 +154,88 @@ Deno.serve(async (req) => {
           message: 'User created successfully',
           userId: authData.user.id 
         }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } else if (action === 'approve_registration') {
+      const { registrationId } = body;
+
+      if (!registrationId || !fullName || !username || !password) {
+        return new Response(
+          JSON.stringify({ error: 'Missing required approval fields' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log('Approving registration:', registrationId);
+
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email: `${username}@syakirdigital.local`,
+        password: password,
+        email_confirm: true,
+      });
+
+      if (authError || !authData.user) {
+        console.error('Error creating auth user for registration:', authError);
+        return new Response(
+          JSON.stringify({ error: authError?.message || 'Failed to create user' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const { error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .insert({
+          user_id: authData.user.id,
+          full_name: fullName,
+          username: username,
+          created_by: user.id,
+        });
+
+      if (profileError) {
+        console.error('Error creating profile for registration:', profileError);
+        await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+        return new Response(
+          JSON.stringify({ error: 'Failed to create profile for registration' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const { error: roleCreateError } = await supabaseAdmin
+        .from('user_roles')
+        .insert({
+          user_id: authData.user.id,
+          role: role || 'mitra',
+        });
+
+      if (roleCreateError) {
+        console.error('Error creating role for registration:', roleCreateError);
+        await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+        return new Response(
+          JSON.stringify({ error: 'Failed to create role for registration' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const { error: updateError } = await supabaseAdmin
+        .from('pending_registrations')
+        .update({
+          status: 'approved',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: user.id,
+        })
+        .eq('id', registrationId);
+
+      if (updateError) {
+        console.error('Error updating registration status:', updateError);
+        await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+        return new Response(
+          JSON.stringify({ error: 'Failed to update registration status' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, message: 'Registration approved and user created' }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
 

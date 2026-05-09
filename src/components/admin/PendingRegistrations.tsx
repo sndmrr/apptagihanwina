@@ -79,35 +79,19 @@ export const PendingRegistrations = () => {
   const handleApprove = async (registration: PendingRegistration) => {
     setProcessingId(registration.id);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        throw new Error('Tidak ada sesi aktif');
-      }
-
       const response = await supabase.functions.invoke('manage-users', {
         body: {
-          action: 'create',
-          email: `${registration.username}@syakirdigital.local`,
-          password: registration.password_hash,
+          action: 'approve_registration',
+          registrationId: registration.id,
           username: registration.username,
+          password: registration.password_hash,
           fullName: registration.full_name,
           role: 'mitra'
         }
       });
 
       if (response.error) throw response.error;
-
-      // Update registration status to approved
-      const { error: updateError } = await supabase
-        .from('pending_registrations')
-        .update({ 
-          status: 'approved',
-          reviewed_at: new Date().toISOString()
-        })
-        .eq('id', registration.id);
-
-      if (updateError) throw updateError;
+      if (!response.data?.success) throw new Error(response.data?.error || 'Gagal menyetujui pendaftaran');
 
       toast({
         title: "✅ Berhasil!",
