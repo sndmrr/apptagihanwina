@@ -1243,8 +1243,8 @@ ALUR ADMIN MANAGE USER:
 ================================================================================
 
 ENVIRONMENT VARIABLES (.env):
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_SUPABASE_URL=https://dvecuxqozqxbgjgyxqpn.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2ZWN1eHFvenF4YmdqZ3l5cXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNDk3NTIsImV4cCI6MjA5MzkyNTc1Mn0.uWPO3oDBS_H_MVwcYHvEk7abCtA9cXmTx_sC7EA36hc
 
 SCRIPTS (package.json):
 - npm run dev: Start development server (Vite)

@@ -1,12 +1,78 @@
 -- ============================================================
--- Initial Schema Migration for TagihanApp-Wina
--- Project: dvecuxqozqxbgjgyxqpn
+-- COMPLETE SCHEMA SQL for Invoice Digital
+-- Project: Invoice Digital by Syakir Digital
+-- Database: PostgreSQL (Supabase)
+-- Description: One-click SQL to create all tables, functions,
+-- triggers, RLS policies, indexes, and realtime config.
 -- ============================================================
 
--- 1. Create ENUM type
+-- ============================================================
+-- 1. CLEANUP (Optional - remove existing objects first)
+-- ============================================================
+-- WARNING: This will DELETE ALL DATA.
+DROP TABLE IF EXISTS public.notifikasi_user CASCADE;
+DROP TABLE IF EXISTS public.push_subscriptions CASCADE;
+DROP TABLE IF EXISTS public.pending_registrations CASCADE;
+DROP TABLE IF EXISTS public.profiles CASCADE;
+DROP TABLE IF EXISTS public.user_roles CASCADE;
+DROP TABLE IF EXISTS public.tagihan CASCADE;
+DROP TABLE IF EXISTS public.settings CASCADE;
+DROP TABLE IF EXISTS public.profit_settings CASCADE;
+DROP TABLE IF EXISTS public.deposit_date_settings CASCADE;
+
+DROP FUNCTION IF EXISTS public.get_global_sisa_saldo() CASCADE;
+DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
+DROP FUNCTION IF EXISTS public.get_user_role(UUID) CASCADE;
+DROP FUNCTION IF EXISTS public.has_role(UUID, public.app_role) CASCADE;
+DROP FUNCTION IF EXISTS public.handle_updated_at() CASCADE;
+
+DROP TYPE IF EXISTS public.app_role CASCADE;
+
+-- Ensure password hashing is available for auth user creation
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Remove from realtime publication (ignore errors if publication doesn't exist)
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime DROP TABLE public.settings;
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'Skipping pub settings cleanup: %', SQLERRM;
+END $$;
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime DROP TABLE public.tagihan;
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'Skipping pub tagihan cleanup: %', SQLERRM;
+END $$;
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime DROP TABLE public.push_subscriptions;
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'Skipping pub push_subscriptions cleanup: %', SQLERRM;
+END $$;
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime DROP TABLE public.deposit_date_settings;
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'Skipping pub deposit_date_settings cleanup: %', SQLERRM;
+END $$;
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime DROP TABLE public.notifikasi_user;
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'Skipping pub notifikasi_user cleanup: %', SQLERRM;
+END $$;
+
+-- ============================================================
+-- 2. ENUM TYPES
+-- ============================================================
 CREATE TYPE public.app_role AS ENUM ('admin', 'mitra');
 
--- 2. Create helper function for updated_at timestamps
+-- ============================================================
+-- 3. HELPER FUNCTIONS
+-- ============================================================
+
+-- Auto-update updated_at timestamp
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -15,7 +81,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 3. Create tables (dependency order: no FK refs first)
+-- ============================================================
+-- 4. TABLES (dependency order: no FK refs first)
+-- ============================================================
 
 -- settings: stores user saldo awal
 CREATE TABLE public.settings (
@@ -116,18 +184,14 @@ CREATE TABLE public.notifikasi_user (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- 4. Enable Row Level Security on all tables
-ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.tagihan ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.pending_registrations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.profit_settings ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.deposit_date_settings ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.notifikasi_user ENABLE ROW LEVEL SECURITY;
+-- ============================================================
+-- 5. INDEXES
+-- ============================================================
+CREATE INDEX idx_tagihan_deleted_at ON public.tagihan(deleted_at) WHERE deleted_at IS NOT NULL;
 
--- 5. Create security definer functions (must exist before RLS policies that use them)
+-- ============================================================
+-- 6. SECURITY DEFINER FUNCTIONS
+-- ============================================================
 
 -- Check if user has a specific role
 CREATE OR REPLACE FUNCTION public.has_role(_user_id UUID, _role public.app_role)
@@ -158,7 +222,7 @@ AS $$
   LIMIT 1;
 $$;
 
--- Function to initialize user settings when they first sign up
+-- Initialize user settings when they first sign up
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
@@ -172,7 +236,7 @@ BEGIN
 END;
 $$;
 
--- Function to get global sisa saldo
+-- Get global sisa saldo
 CREATE OR REPLACE FUNCTION public.get_global_sisa_saldo()
 RETURNS TABLE (
   total_saldo_induk numeric,
@@ -210,10 +274,24 @@ BEGIN
 END;
 $$;
 
--- Grant execute permission to authenticated users
 GRANT EXECUTE ON FUNCTION public.get_global_sisa_saldo() TO authenticated;
 
--- 6. RLS Policies
+-- ============================================================
+-- 7. ENABLE ROW LEVEL SECURITY
+-- ============================================================
+ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tagihan ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pending_registrations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profit_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.deposit_date_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifikasi_user ENABLE ROW LEVEL SECURITY;
+
+-- ============================================================
+-- 8. RLS POLICIES
+-- ============================================================
 
 -- settings policies
 CREATE POLICY "Users can view their own settings"
@@ -314,10 +392,9 @@ CREATE POLICY "Users can mark notifications as read"
     )
   );
 
--- 7. Indexes
-CREATE INDEX idx_tagihan_deleted_at ON public.tagihan(deleted_at) WHERE deleted_at IS NOT NULL;
-
--- 8. Triggers for updated_at
+-- ============================================================
+-- 9. TRIGGERS for updated_at
+-- ============================================================
 CREATE TRIGGER settings_updated_at
   BEFORE UPDATE ON public.settings
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
@@ -338,12 +415,13 @@ CREATE TRIGGER update_deposit_date_settings_updated_at
   BEFORE UPDATE ON public.deposit_date_settings
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
--- Trigger to auto-create settings for new users
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 9. Enable Realtime / Replica Identity
+-- ============================================================
+-- 10. ENABLE REALTIME / REPLICA IDENTITY
+-- ============================================================
 ALTER TABLE public.settings REPLICA IDENTITY FULL;
 ALTER TABLE public.tagihan REPLICA IDENTITY FULL;
 ALTER TABLE public.push_subscriptions REPLICA IDENTITY FULL;
@@ -356,5 +434,49 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.push_subscriptions;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.deposit_date_settings;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.notifikasi_user;
 
--- 10. Seed initial data
+-- ============================================================
+-- 11. SEED INITIAL DATA
+-- ============================================================
 INSERT INTO public.profit_settings (profit_amount) VALUES (0);
+
+-- Default admin account
+DO $$
+DECLARE
+  admin_user_id UUID;
+BEGIN
+  SELECT id INTO admin_user_id FROM auth.users WHERE email = 'admin@syakirdigital.local' LIMIT 1;
+
+  IF admin_user_id IS NULL THEN
+    INSERT INTO auth.users (id, aud, role, email, encrypted_password, raw_user_meta_data, raw_app_meta_data, email_confirmed_at, confirmation_sent_at, created_at, updated_at)
+    VALUES (
+      gen_random_uuid(),
+      'authenticated',
+      'authenticated',
+      'admin@syakirdigital.local',
+      crypt('Rijal1101*', gen_salt('bf')),
+      '{}'::jsonb,
+      '{}'::jsonb,
+      now(),
+      now(),
+      now(),
+      now()
+    )
+    RETURNING id INTO admin_user_id;
+  END IF;
+
+  INSERT INTO public.profiles (user_id, full_name, username, created_by)
+  SELECT admin_user_id, 'Admin', 'admin', admin_user_id
+  WHERE NOT EXISTS (
+    SELECT 1 FROM public.profiles WHERE user_id = admin_user_id
+  );
+
+  INSERT INTO public.user_roles (user_id, role)
+  SELECT admin_user_id, 'admin'
+  WHERE NOT EXISTS (
+    SELECT 1 FROM public.user_roles WHERE user_id = admin_user_id AND role = 'admin'
+  );
+END $$;
+
+-- ============================================================
+-- DONE
+-- ============================================================
