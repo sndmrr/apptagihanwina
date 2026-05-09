@@ -82,7 +82,7 @@ export const ResellerRegistration = ({ onBack }: ResellerRegistrationProps) => {
             <UserPlus className="w-8 h-8 text-white" />
           </motion.div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">✨ Daftar Jadi Reseller</h2>
-          <p className="text-gray-500 text-sm">Bergabung bersama Syakir Digital</p>
+          <p className="text-gray-500 text-sm">Bergabung bersama Invoice Digital by Syakir Digital</p>
         </div>
         <form onSubmit={handleRegister} className="space-y-4">
           <div className="space-y-2">
@@ -105,7 +105,7 @@ export const ResellerRegistration = ({ onBack }: ResellerRegistrationProps) => {
             <div className="flex items-start gap-3">
               <Checkbox id="terms" checked={agreedToTerms} onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)} className="mt-1 border-gray-300 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600" />
               <label htmlFor="terms" className="text-gray-700 text-sm leading-relaxed cursor-pointer">
-                Saya <span className="text-green-600 font-semibold">bersedia</span> dan <span className="text-green-600 font-semibold">memahami</span> ketentuan yang telah ditetapkan oleh Syakir Digital 📋
+                Saya <span className="text-green-600 font-semibold">bersedia</span> dan <span className="text-green-600 font-semibold">memahami</span> ketentuan yang telah ditetapkan oleh Invoice Digital by Syakir Digital 📋
               </label>
             </div>
           </div>

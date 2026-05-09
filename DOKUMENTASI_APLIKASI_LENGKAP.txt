@@ -1,6 +1,6 @@
 ================================================================================
                     DOKUMENTASI APLIKASI LENGKAP
-                    SYAKIR DIGITAL - PULSA SNDMRR
+                    INVOICE DIGITAL - PULSA SNDMRR
 ================================================================================
 Versi: 2.0.0
 Tanggal: 08 Mei 2026
@@ -33,7 +33,7 @@ Teknologi: React, TypeScript, Supabase, Tailwind CSS, shadcn/ui
                         1. OVERVIEW APLIKASI
 ================================================================================
 
-Nama Aplikasi: Syakir Digital
+Nama Aplikasi: Invoice Digital by Syakir Digital
 Deskripsi: Aplikasi web manajemen tagihan dan pembayaran digital services (pulsa)
 dengan gaya mobile-first Android app. Aplikasi ini dirancang untuk memudahkan
 pencatatan tagihan, pelunasan, dan manajemen keuangan untuk bisnis digital services.
@@ -280,8 +280,8 @@ D. MITRA DASHBOARD
 A. HEADER (Header.tsx)
    Fungsi:
    - Menampilkan logo animasi
-   - Nama aplikasi "Syakir Digital"
-   - Tagline "Solusi Digital"
+   - Nama aplikasi "Invoice Digital"
+   - Tagline "by Syakir Digital"
    - Tombol sign out
    - Tombol admin menu (hanya untuk admin)
    
@@ -1287,7 +1287,7 @@ DEPLOYMENT:
 ================================================================================
 
 Dokumentasi ini mencakup seluruh fitur, komponen, dan fungsionalitas aplikasi
-Syakir Digital versi 2.0.0. Untuk informasi lebih lanjut atau pertanyaan,
+Invoice Digital by Syakir Digital versi 2.0.0. Untuk informasi lebih lanjut atau pertanyaan,
 silakan hubungi tim pengembang.
 
 Last Updated: 08 Mei 2026

@@ -127,8 +127,8 @@ export const InvoicePrintable = React.forwardRef<HTMLDivElement, InvoicePrintabl
               <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">SYAKIR DIGITAL</h1>
-              <p className="text-blue-100 text-xs sm:text-sm font-medium">Layanan Kebutuhan Digital</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">INVOICE DIGITAL</h1>
+              <p className="text-blue-100 text-xs sm:text-sm font-medium">by Syakir Digital</p>
             </div>
           </div>
           <div className="text-left sm:text-right space-y-1 bg-white/10 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-white/20">
@@ -341,7 +341,7 @@ export const InvoicePrintable = React.forwardRef<HTMLDivElement, InvoicePrintabl
         
         <div className="text-center space-y-2 sm:space-y-3 relative z-10">
           <h3 className="text-base sm:text-lg font-bold">Terima Kasih Atas Kepercayaan Anda</h3>
-          <p className="text-blue-100 text-xs sm:text-sm">Invoice ini dibuat secara otomatis oleh sistem Syakir Digital</p>
+          <p className="text-blue-100 text-xs sm:text-sm">Invoice ini dibuat secara otomatis oleh sistem Invoice Digital by Syakir Digital</p>
           <div className="pt-2">
             <div className={`inline-flex items-center px-4 py-2 rounded-full text-xs sm:text-sm font-semibold shadow-lg ${getTrustScoreColor(trustScore)}`}>
               ⭐ Skor Kepercayaan: {trustScore}

@@ -152,8 +152,8 @@ const Auth = () => {
         </svg>
         <div className="absolute top-6 sm:top-4 left-0 right-0 text-center z-20 px-4">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg">Syakir Digital</h1>
-            <p className="text-white/90 text-xs sm:text-sm mb-1 sm:mb-2 drop-shadow-md">Solusi Kebutuhan Digital Anda</p>
+            <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg">Invoice Digital</h1>
+            <p className="text-white/90 text-xs sm:text-sm mb-1 sm:mb-2 drop-shadow-md">by Syakir Digital</p>
             <p className="text-green-600 font-bold text-sm sm:text-lg tracking-wider drop-shadow-lg bg-white/90 rounded-full px-4 py-1 inline-block">AHLAN WA SAHLAN</p>
           </motion.div>
         </div>

@@ -33,14 +33,18 @@ export const LoadingScreen = ({ onLoadingComplete }: LoadingScreenProps) => {
         <div className="mb-8">
           <div className="relative flex justify-center">
             <div className="relative">
-              <img src={syakirLogo} alt="Syakir Digital Logo" className="h-24 w-auto animate-pulse" style={{ animationDuration: '2s' }} />
+              <img src={syakirLogo} alt="Invoice Digital Logo" className="h-24 w-auto animate-pulse" style={{ animationDuration: '2s' }} />
               <div className="absolute inset-0 bg-gradient-to-r from-green-400/30 to-emerald-400/30 blur-2xl animate-pulse" style={{ animationDuration: '2s' }}></div>
             </div>
           </div>
         </div>
         
         <div className="text-responsive-lg font-orbitron font-black bg-gradient-to-r from-white via-green-200 to-emerald-200 bg-clip-text text-transparent animate-bounce-in">
-          Syakir Digital
+          Invoice Digital
+        </div>
+        
+        <div className="mt-2 text-white/70 text-xs font-medium animate-slide-up">
+          by Syakir Digital
         </div>
         
         <div className="mt-4 text-white/80 text-sm font-medium animate-slide-up">

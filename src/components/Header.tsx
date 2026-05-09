@@ -25,10 +25,10 @@ export const Header = ({ onSignOut, showAdminMenu, onAdminMenuClick }: HeaderPro
           </div>
           <div>
             <h1 className="text-sm font-orbitron font-bold text-green-600 leading-tight">
-              Syakir Digital
+              Invoice Digital
             </h1>
             <p className="text-[9px] text-gray-400 font-medium leading-none mt-0.5">
-              Solusi Digital
+              by Syakir Digital
             </p>
           </div>
         </div>
