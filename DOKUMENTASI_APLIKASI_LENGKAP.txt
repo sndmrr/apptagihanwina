@@ -1,0 +1,1293 @@
+================================================================================
+                    DOKUMENTASI APLIKASI LENGKAP
+                    SYAKIR DIGITAL - PULSA SNDMRR
+================================================================================
+Versi: 2.0.0
+Tanggal: 08 Mei 2026
+Tipe: Mobile-First Android App Style Web Application
+Teknologi: React, TypeScript, Supabase, Tailwind CSS, shadcn/ui
+
+================================================================================
+                            TABEL KONTEN
+================================================================================
+1. OVERVIEW APLIKASI
+2. TEKNOLOGI DAN DEPENDENCIES
+3. STRUKTUR APLIKASI
+4. HALAMAN DAN ROUTING
+5. KOMPONEN UTAMA
+6. SISTEM AUTHENTICATION
+7. SISTEM ROLE DAN PERMISSIONS
+8. MANAJEMEN TAGIHAN (BILLING)
+9. SISTEM INVOICE
+10. FITUR ADMIN
+11. FITUR MITRA
+12. UI/UX DESIGN
+13. STYLING DAN TEMA
+14. HOOKS KUSTOM
+15. INTEGRASI SUPABASE
+16. FITUR TAMBAHAN
+17. ALUR PENGGUNA
+18. KONFIGURASI DAN ENVIRONMENT
+
+================================================================================
+                        1. OVERVIEW APLIKASI
+================================================================================
+
+Nama Aplikasi: Syakir Digital
+Deskripsi: Aplikasi web manajemen tagihan dan pembayaran digital services (pulsa)
+dengan gaya mobile-first Android app. Aplikasi ini dirancang untuk memudahkan
+pencatatan tagihan, pelunasan, dan manajemen keuangan untuk bisnis digital services.
+
+Fitur Utama:
+- Manajemen tagihan aktif dan lunas
+- Sistem pembayaran langsung
+- Generasi invoice otomatis
+- Role-based access control (Admin, Mitra, User biasa)
+- Real-time data synchronization
+- Dashboard statistik
+- Cek tagihan publik
+- Pendaftaran reseller
+- Mobile-first responsive design
+
+================================================================================
+                      2. TEKNOLOGI DAN DEPENDENCIES
+================================================================================
+
+CORE FRAMEWORK:
+- React 18.3.1
+- TypeScript 5.5.3
+- Vite 5.4.1
+
+UI FRAMEWORK:
+- Tailwind CSS 3.4.11
+- shadcn/ui components
+- Framer Motion 12.23.26 (animations)
+- Lucide React 0.462.0 (icons)
+
+STATE MANAGEMENT:
+- @tanstack/react-query 5.56.2
+- React Context API
+
+BACKEND/DATABASE:
+- @supabase/supabase-js 2.50.0
+
+ROUTING:
+- react-router-dom 6.26.2
+
+FORM HANDLING:
+- react-hook-form 7.53.0
+- @hookform/resolvers 3.9.0
+- zod 3.23.8 (validation)
+
+DATE HANDLING:
+- date-fns 3.6.0
+- react-day-picker 8.10.1
+
+UI COMPONENTS (Radix UI):
+- @radix-ui/react-accordion
+- @radix-ui/react-alert-dialog
+- @radix-ui/react-avatar
+- @radix-ui/react-checkbox
+- @radix-ui/react-dialog
+- @radix-ui/react-dropdown-menu
+- @radix-ui/react-label
+- @radix-ui/react-popover
+- @radix-ui/react-progress
+- @radix-ui/react-select
+- @radix-ui/react-separator
+- @radix-ui/react-slider
+- @radix-ui/react-switch
+- @radix-ui/react-tabs
+- @radix-ui/react-toast
+- @radix-ui/react-tooltip
+- Dan banyak lagi...
+
+UTILITY:
+- clsx 2.1.1
+- tailwind-merge 2.5.2
+- class-variance-authority 0.7.1
+- html2canvas 1.4.1 (screenshot/invoice)
+- sonner 1.5.0 (toast notifications)
+
+================================================================================
+                        3. STRUKTUR APLIKASI
+================================================================================
+
+src/
+├── App.tsx                          # Main application component
+├── main.tsx                        # Entry point
+├── index.css                       # Global CSS with Tailwind
+├── App.css                         # App-specific styles
+│
+├── pages/                          # Page components
+│   ├── Index.tsx                   # Main dashboard (user biasa)
+│   ├── Auth.tsx                    # Authentication page
+│   └── NotFound.tsx                # 404 page
+│
+├── components/                     # React components
+│   ├── Header.tsx                  # App header
+│   ├── DashboardCards.tsx          # Dashboard statistics cards
+│   ├── BottomNav.tsx               # Bottom navigation bar
+│   ├── WelcomeGreeting.tsx         # Welcome message with time-based greeting
+│   ├── LoadingScreen.tsx          # Loading screen
+│   ├── AnimatedLogo.tsx            # Animated logo component
+│   │
+│   ├── TagihanAktif.tsx            # Active bills management
+│   ├── TagihanLunas.tsx            # Paid bills management
+│   ├── DeletedTagihan.tsx          # Deleted bills (trash)
+│   ├── AddTagihan.tsx              # Add new bill form
+│   ├── AddTagihanUser.tsx          # Add bill for specific user
+│   ├── BayarLangsung.tsx           # Direct payment form
+│   ├── CekTagihan.tsx              # Public bill checker
+│   ├── ResellerRegistration.tsx    # Reseller registration form
+│   ├── DepositDateCard.tsx         # Deposit date card for mitra
+│   ├── Invoice.tsx                 # Invoice component
+│   ├── ModernNotification.tsx      # Custom notification system
+│   ├── NotifikasiPopup.tsx         # Notification popup
+│   │
+│   ├── admin/                      # Admin-specific components
+│   │   ├── AdminDashboard.tsx      # Admin main dashboard
+│   │   ├── AdminMenu.tsx           # Admin menu sidebar
+│   │   ├── UserManagement.tsx      # User management CRUD
+│   │   ├── PendingRegistrations.tsx # Pending reseller registrations
+│   │   ├── TanggalSetorMitra.tsx   # Mitra deposit date management
+│   │   ├── RekapLaporan.tsx        # Report summary
+│   │   ├── HapusData.tsx           # Data deletion management
+│   │   └── PesanKeUser.tsx         # Message to users
+│   │
+│   ├── mitra/                      # Mitra-specific components
+│   │   └── MitraDashboard.tsx      # Mitra main dashboard
+│   │
+│   ├── invoice/                    # Invoice-related components
+│   │   ├── InvoiceDialog.tsx       # Invoice dialog
+│   │   ├── InvoiceForm.tsx         # Invoice form
+│   │   ├── InvoicePrintable.tsx    # Printable invoice
+│   │   ├── AddTagihanForm.tsx      # Add bill to invoice form
+│   │   └── types.ts                # Invoice TypeScript types
+│   │
+│   └── ui/                         # shadcn/ui components
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── input.tsx
+│       ├── label.tsx
+│       ├── dialog.tsx
+│       ├── alert-dialog.tsx
+│       ├── badge.tsx
+│       ├── select.tsx
+│       ├── switch.tsx
+│       ├── toast.tsx
+│       ├── sonner.tsx
+│       └── [40+ more UI components]
+│
+├── hooks/                          # Custom React hooks
+│   ├── useAuth.tsx                 # Authentication state
+│   ├── useUserRole.tsx             # User role detection
+│   ├── useSupabaseData.tsx         # Supabase data fetching
+│   ├── useAdminData.tsx            # Admin-specific data
+│   ├── useTagihanOperations.tsx    # Bill operations
+│   ├── useAutoCleanup.tsx          # Auto cleanup old bills
+│   ├── useGlobalSisaSaldo.tsx      # Global remaining balance
+│   ├── useProfit.tsx               # Profit calculation
+│   ├── useUserPermissions.tsx      # User permission checks
+│   ├── useDepositDate.tsx          # Deposit date management
+│   ├── use-toast.ts                # Toast notifications
+│   ├── useModernNotification.tsx    # Custom notifications
+│   └── use-mobile.tsx              # Mobile detection
+│
+├── lib/                            # Utility functions
+│   ├── utils.ts                    # General utilities (cn function)
+│   └── userColors.ts               # User color generator
+│
+└── integrations/
+    └── supabase/
+        └── client.ts               # Supabase client initialization
+
+================================================================================
+                        4. HALAMAN DAN ROUTING
+================================================================================
+
+ROUTES:
+1. "/" (Index)
+   - Main dashboard untuk user biasa
+   - Redirect ke MitraDashboard jika role = mitra
+   - Redirect ke AdminDashboard jika role = admin
+   - Redirect ke /auth jika belum login
+
+2. "/auth" (Auth)
+   - Halaman login dan register
+   - Fitur cek tagihan publik
+   - Pendaftaran reseller
+   - Landing page dengan animasi
+
+3. "*" (NotFound)
+   - Halaman 404 untuk route yang tidak ditemukan
+
+HALAMAN DETAIL:
+
+A. INDEX PAGE (User Biasa)
+   Components:
+   - Header: Logo, app name, sign out button
+   - WelcomeGreeting: Time-based greeting dengan motivational message
+   - DashboardCards: 4 cards (Saldo Awal, Tagihan Aktif, Pembayaran, Sisa Saldo)
+   - TagihanAktif: List tagihan yang belum lunas (grouped by nama)
+   - TagihanLunas: List tagihan yang sudah lunas
+   - DeletedTagihan: List tagihan yang dihapus (trash)
+   - BottomNav: Navigation dengan 3 tombol (Tambah Tagihan, Bayar Langsung, Tambah User)
+   - Dialogs: Add Tagihan, Bayar Langsung
+
+B. AUTH PAGE
+   Sections:
+   - Landing Section: Logo, app name, tagline, feature badges
+   - Cek Tagihan: Public bill checker (tanpa login)
+   - Login Form: Username dan password
+   - Register Form: Pendaftaran reseller (pending approval)
+   - Background effects: Animated gradient blobs
+
+C. ADMIN DASHBOARD
+   Sections:
+   - Header dengan admin menu button
+   - WelcomeGreeting
+   - DashboardCards (sama dengan user biasa)
+   - Admin Menu Sheet:
+     * User Management (CRUD users)
+     * Pending Registrations (approve/reject reseller)
+     * Tanggal Setor Mitra (manage deposit dates)
+     * Rekap Laporan (summary reports)
+     * Hapus Data (data deletion)
+     * Pesan Ke User (send messages)
+   - TagihanAktif dengan filter by user
+   - TagihanLunas
+   - DeletedTagihan
+   - BottomNav dengan tambahan "Tambah User"
+
+D. MITRA DASHBOARD
+   Sections:
+   - Header
+   - WelcomeGreeting
+   - DepositDateCard: Card tanggal setor
+   - Stats Cards: 6 cards (Jumlah Tagihan, Jumlah Setor, Jumlah Komisi, 
+     Jumlah Bonus, Jumlah Lunas, Sisa Saldo Mitra)
+   - TagihanAktif
+   - TagihanLunas
+   - BayarLangsung
+   - BottomNav
+   - NotifikasiPopup: Notification system untuk mitra
+
+================================================================================
+                      5. KOMPONEN UTAMA
+================================================================================
+
+A. HEADER (Header.tsx)
+   Fungsi:
+   - Menampilkan logo animasi
+   - Nama aplikasi "Syakir Digital"
+   - Tagline "Solusi Digital"
+   - Tombol sign out
+   - Tombol admin menu (hanya untuk admin)
+   
+   Styling:
+   - Compact height (p-3)
+   - White background dengan shadow
+   - Rounded corners (rounded-2xl)
+   - Green accent text
+
+B. DASHBOARD CARDS (DashboardCards.tsx)
+   Cards:
+   1. Saldo Awal - Modal awal bisnis
+   2. Tagihan Aktif - Total tagihan belum lunas
+   3. Total Pembayaran - Total yang sudah dibayar
+   4. Sisa Saldo - Saldo tersedia
+
+   Features:
+   - Edit saldo awal (dialog)
+   - 2-column grid layout
+   - Fixed height (h-24)
+   - Green borders dan icons
+   - Compact padding
+   - Animasi staggered
+
+C. BOTTOM NAV (BottomNav.tsx)
+   Layout:
+   - Fixed di bottom screen
+   - Rounded top (rounded-t-3xl)
+   - Safe-area support untuk Android
+   - High z-index (9999)
+   - Floating center button (Bayar Langsung)
+
+   Buttons:
+   1. Left: Tambah Tagihan
+   2. Center (floating): Bayar Langsung (green, wallet icon)
+   3. Right: Tambah User (opsional)
+
+   Styling:
+   - White background
+   - Soft shadow
+   - Scale animation on tap
+   - Compact spacing
+
+D. WELCOME GREETING (WelcomeGreeting.tsx)
+   Features:
+   - Time-based greeting (Pagi, Siang, Sore, Malam)
+   - Dynamic icon berdasarkan waktu
+   - Gradient background (green theme)
+   - Random motivational message
+   - Refresh button untuk reload page
+
+   Styling:
+   - Rounded corners (rounded-xl)
+   - Green gradient background
+   - Animated background blob
+   - Compact padding
+
+E. TAGIHAN AKTIF (TagihanAktif.tsx)
+   Features:
+   - Group tagihan by nama
+   - Mark as lunas (dengan confirmation dialog)
+   - Edit tagihan (inline edit)
+   - Delete tagihan (soft delete)
+   - Generate invoice
+   - Show user profile badges (untuk admin)
+   - Sort by updated_at (newest first)
+
+   Styling:
+   - Card-based layout
+   - User color badges
+   - Status badges
+   - Action buttons (Check, Edit, Trash)
+
+F. TAGIHAN LUNAS (TagihanLunas.tsx)
+   Features:
+   - List tagihan yang sudah lunas
+   - Restore ke tagihan aktif
+   - Delete permanently
+   - Delete all lunas
+   - Show input user dan lunas user
+   - Format tanggal Indonesia
+
+   Styling:
+   - Green gradient background
+   - Check badge "✓ Lunas"
+   - Compact spacing
+
+G. ADD TAGIHAN (AddTagihan.tsx)
+   Features:
+   - Form input nama dan jumlah
+   - Loading notification (2 seconds)
+   - Success notification
+   - Auto-clear form setelah submit
+   - Ref focus ke nama input
+
+   Styling:
+   - Decorative header dengan emoji
+   - Grid layout
+   - Blue gradient button
+
+H. BAYAR LANGSUNG (BayarLangsung.tsx)
+   Features:
+   - Form pembayaran langsung
+   - Auto-format number (Indonesian format: 1.000.000)
+   - Masuk langsung ke kategori lunas
+   - Toast notification
+
+   Styling:
+   - Dialog component
+   - Green gradient trigger button
+   - Form validation
+
+I. CEK TAGIHAN (CekTagihan.tsx)
+   Features:
+   - Public access (tanpa login)
+   - Search by nama (partial match)
+   - Group by nama
+   - Show active dan paid bills
+   - Show total per group
+
+   Styling:
+   - Glass morphism card
+   - Green gradient title
+   - Compact list items
+
+J. INVOICE (InvoicePrintable.tsx)
+   Features:
+   - Professional invoice layout
+   - Company header
+   - Invoice number (auto-generated)
+   - Date dan due date
+   - Item list dengan keterangan
+   - Total calculation
+   - Trust score badge
+   - Overdue warning
+   - Additional items (add/remove)
+   - Editable keterangan
+   - Screenshot capability (html2canvas)
+
+   Styling:
+   - Print-friendly layout
+   - Professional typography
+   - Color-coded status
+   - Responsive
+
+K. DELETED TAGIHAN (DeletedTagihan.tsx)
+   Features:
+   - List tagihan yang dihapus
+   - Restore to active
+   - Permanent delete
+   - Show deletion date
+
+   Styling:
+   - Red/gray theme
+   - Trash icon
+
+L. ANIMATED LOGO (AnimatedLogo.tsx)
+   Features:
+   - SVG-based logo
+   - Pulse animation
+   - Different sizes (sm, md, lg, xl)
+   - Green gradient
+
+M. LOADING SCREEN (LoadingScreen.tsx)
+   Features:
+   - Progress bar animation
+   - Logo animation
+   - Loading text
+   - App version check
+   - Auto-redirect after loading
+
+N. RESELLER REGISTRATION (ResellerRegistration.tsx)
+   Features:
+   - Form: Full name, username, password
+   - Password confirmation
+   - Terms agreement checkbox
+   - Validation (min 6 chars, matching passwords)
+   - Check duplicate username
+   - Insert ke pending_registrations
+   - Success screen dengan waiting message
+
+   Styling:
+   - Glass morphism
+   - Animated background blobs
+   - Gradient buttons
+
+================================================================================
+                    6. SISTEM AUTHENTICATION
+================================================================================
+
+PROVIDER: AuthProvider (useAuth.tsx)
+
+Features:
+- Supabase authentication
+- Session management
+- Auto version check (force re-login on version change)
+- Local storage untuk userName
+- Auto signOut on version mismatch
+
+Methods:
+- signUp(email, password): Register new user
+- signIn(email, password, nama): Login dengan username
+- signOut(): Logout dan clear all storage
+
+APP VERSIONING:
+- Current version: 2.0.0
+- Stored in localStorage (VERSION_KEY)
+- Auto-clear storage on version mismatch
+
+AUTH FLOW:
+1. User enters username di login form
+2. Email constructed: {username}@syakirdigital.local
+3. Password sent ke Supabase
+4. On success: userName stored, version stored
+5. On signOut: Clear all storage, redirect to /auth
+
+REGISTRATION FLOW (Reseller):
+1. User fills registration form
+2. Check duplicate username di pending_registrations
+3. Check duplicate username di profiles
+4. Insert ke pending_registrations (status: pending)
+5. Show success screen
+6. Admin must approve di PendingRegistrations component
+
+================================================================================
+                    7. SISTEM ROLE DAN PERMISSIONS
+================================================================================
+
+ROLES:
+1. ADMIN
+   - Full access ke semua data
+   - User management (CRUD)
+   - Approve/reject reseller registrations
+   - Access admin menu sheet
+   - Filter data by user
+   - Send messages ke users
+   - Delete data permanently
+
+2. MITRA
+   - Limited access ke own data
+   - Can edit/delete/lunas berdasarkan permissions
+   - Deposit date management
+   - Stats cards (tagihan, setor, komisi, bonus, lunas, sisa saldo)
+   - Notification system
+   - No access ke admin menu
+
+3. USER BIASA
+   - Access ke own data only
+   - Full permissions (edit, delete, lunas)
+   - Basic dashboard
+   - No admin menu
+   - No mitra features
+
+PERMISSIONS (di profiles table):
+- can_edit_data: Permission untuk edit tagihan
+- can_delete_data: Permission untuk delete tagihan
+- can_lunas_data: Permission untuk mark as lunas
+
+HOOK: useUserPermissions()
+- Returns: { canEditData, canDeleteData, canLunasData }
+- Checks user's profile permissions
+
+HOOK: useUserRole()
+- Returns: { role, profile, loading }
+- role: 'admin' | 'mitra' | null
+- profile: User profile data
+
+================================================================================
+                  8. MANAJEMEN TAGIHAN (BILLING)
+================================================================================
+
+DATA STRUCTURE (Tagihan):
+{
+  id: string
+  nama: string
+  jumlah: number
+  status: 'belum_lunas' | 'lunas'
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+  user_id: string
+  nama_input?: string (user yang menginput)
+  nama_lunas?: string (user yang melunasi)
+}
+
+HOOK: useSupabaseData()
+- Fetches tagihans berdasarkan user_id
+- Real-time subscription ke changes
+- Separates active dan deleted tagihans
+- Fetches settings (saldo_awal)
+
+OPERATIONS (useTagihanOperations):
+1. handleAddTagihan(nama, jumlah)
+   - Insert new tagihan
+   - Status: belum_lunas
+   - Auto-set nama_input dari current user
+
+2. handleMarkAsLunas(id, nama)
+   - Update status ke 'lunas'
+   - Set nama_lunas dari current user
+   - Update updated_at
+
+3. handleDeleteTagihan(id)
+   - Soft delete (set deleted_at)
+   - Move ke trash
+
+4. handleRestoreTagihan(id)
+   - Restore from trash (set deleted_at = null)
+
+5. handlePermanentDeleteTagihan(id)
+   - Delete permanently dari database
+
+6. handleUpdateTagihan(id, nama, jumlah, status?)
+   - Update tagihan data
+   - Optional status change
+
+7. handleUpdateSaldoAwal(amount)
+   - Update settings.saldo_awal
+   - Recalculate sisa saldo
+
+8. handleDeleteAllLunas()
+   - Delete all tagihan with status 'lunas'
+
+GROUPING:
+- TagihanAktif groups by nama (case-insensitive)
+- Shows total per group
+- Sorts items by updated_at (newest first)
+
+AUTO CLEANUP (useAutoCleanup):
+- Automatically deletes old paid bills
+- Configurable cleanup period
+- Runs on mount
+
+================================================================================
+                      9. SISTEM INVOICE
+================================================================================
+
+INVOICE COMPONENTS:
+1. InvoiceDialog: Dialog wrapper
+2. InvoiceForm: Form untuk generate invoice
+3. InvoicePrintable: Printable invoice layout
+4. AddTagihanForm: Add items to invoice
+
+INVOICE DATA (GroupedTagihan):
+{
+  nama: string
+  items: Tagihan[]
+  totalJumlah: number
+}
+
+FEATURES:
+- Auto-generated invoice number (INV-{timestamp})
+- Company header dengan logo
+- Invoice date
+- Due date calculation (created_at + 7 days)
+- Item list dengan keterangan
+- Editable keterangan per item
+- Additional items (add/remove)
+- Trust score calculation
+- Overdue warning (jika > 7 days)
+- Screenshot capability (html2canvas)
+
+TRUST SCORE:
+- Calculated based on payment history
+- Color-coded:
+  * 0-50: Red (low trust)
+  * 51-75: Yellow (medium trust)
+  * 76-90: Blue (high trust)
+  * 91-100: Green (excellent trust)
+
+INVOICE LAYOUT:
+- Header: Company name, address, contact
+- Invoice details: Number, date, due date
+- Customer info: Name
+- Items table: Description, quantity, amount
+- Summary: Subtotal, total
+- Footer: Terms, trust score badge
+
+================================================================================
+                       10. FITUR ADMIN
+================================================================================
+
+ADMIN DASHBOARD COMPONENTS:
+
+A. USER MANAGEMENT (UserManagement.tsx)
+   Features:
+   - List all users (profiles)
+   - Add new user (admin/mitra)
+   - Edit user details
+   - Delete user
+   - Set permissions (can_edit, can_delete, can_lunas)
+   - Change role (admin/mitra)
+   - Reset password
+   - Collapsible user details
+
+   Form Fields:
+   - Full name
+   - Username
+   - Password
+   - Role (admin/mitra)
+   - Permissions (switches)
+
+B. PENDING REGISTRATIONS (PendingRegistrations.tsx)
+   Features:
+   - List pending reseller registrations
+   - View registration details
+   - Approve registration:
+     * Create Supabase auth user
+     * Insert ke profiles table
+     * Delete from pending_registrations
+   - Reject registration:
+     * Delete from pending_registrations
+   - Auto-refresh on changes
+
+C. TANGGAL SETOR MITRA (TanggalSetorMitra.tsx)
+   Features:
+   - Manage deposit dates untuk mitra
+   - Set tanggal setor per mitra
+   - View/setor dates list
+   - Edit/delete dates
+
+D. REKAP LAPORAN (RekapLaporan.tsx)
+   Features:
+   - Summary reports per user
+   - Filter by user
+   - Metrics:
+     * Jumlah Tagihan
+     * Total Rupiah
+     * Komisi (Rp 1000 per tagihan)
+     * Bonus (Rp 5000 jika > 30 tagihan)
+     * Setor (Total - Komisi - Bonus)
+   - Card-based layout
+
+E. HAPUS DATA (HapusData.tsx)
+   Features:
+   - Delete all data options
+   - Delete by date range
+   - Delete by status
+   - Confirmation dialog
+   - Admin only
+
+F. PESAN KE USER (PesanKeUser.tsx)
+   Features:
+   - Send message ke specific user
+   - Broadcast message ke all users
+   - Message history
+   - Toast notification on send
+
+ADMIN MENU SHEET:
+- Slide-out menu dari left
+- Menu items dengan icons
+- Active section indicator
+- Smooth animation
+
+================================================================================
+                       11. FITUR MITRA
+================================================================================
+
+MITRA DASHBOARD FEATURES:
+
+A. DEPOSIT DATE CARD (DepositDateCard.tsx)
+   - Shows current deposit date
+   - Edit deposit date
+   - Shows days until deposit
+   - Warning jika overdue
+
+B. STATS CARDS (6 cards):
+   1. Jumlah Tagihan - Total tagihan aktif
+   2. Jumlah Setor - Total yang disetor
+   3. Jumlah Komisi - Komisi dari tagihan
+   4. Jumlah Bonus - Bonus dari volume
+   5. Jumlah Lunas - Total yang sudah lunas
+   6. Sisa Saldo Mitra - Saldo tersedia
+
+   Calculations:
+   - Komisi = jumlahTagihan * 1000
+   - Bonus = 5000 jika jumlahTagihan > 30
+   - Sisa Saldo = sisaSaldoGlobal + profit
+
+C. NOTIFIKASI POPUP (NotifikasiPopup.tsx)
+   - Real-time notifications
+   - Auto-dismiss
+   - Toast-style
+   - Sound notification (opsional)
+
+D. PERMISSIONS:
+   - canEditData: Edit tagihan
+   - canDeleteData: Delete tagihan
+   - canLunasData: Mark as lunas
+   - Controlled by admin
+
+E. RESTRICTIONS:
+   - No access ke admin menu
+   - No access ke user management
+   - Limited ke own data only
+   - Cannot delete permanently
+
+================================================================================
+                      12. UI/UX DESIGN
+================================================================================
+
+DESIGN PHILOSOPHY:
+- Mobile-first Android app style
+- Clean, minimalist interface
+- Native Android feel
+- Smooth animations
+- Consistent spacing
+- Rounded corners
+- Soft shadows
+
+COLOR PALETTE:
+- Primary: Green (#16a34a - HSL 142 76% 36%)
+- Secondary: Light green
+- Background: White (#ffffff)
+- Foreground: Dark gray (#0a0a0a)
+- Accent: Green variants
+- Destructive: Red
+
+TYPOGRAPHY:
+- Font: System fonts (San Francisco, Roboto, Segoe UI)
+- Orbitron font untuk logo/headings
+- Responsive font sizes
+- Modern, clean look
+
+SPACING:
+- Compact spacing (mobile-optimized)
+- space-y-4 untuk sections
+- p-3 to p-4 untuk padding
+- Reduced margins
+
+BORDER RADIUS:
+- Default: 1rem (rounded-xl)
+- Cards: rounded-2xl
+- Buttons: rounded-xl
+- Dialogs: rounded-2xl
+
+SHADOWS:
+- Soft shadows (shadow-sm, shadow-md)
+- Hover: shadow-lg
+- Focus: shadow-xl
+
+ANIMATIONS:
+- Framer Motion library
+- Staggered animations
+- Scale effects on tap
+- Fade-in/slide-in
+- Pulse effects
+- Float animations (background blobs)
+
+COMPONENT PATTERNS:
+- Card-based layout
+- Glass morphism effects
+- Gradient backgrounds
+- Icon-based actions
+- Bottom navigation (mobile)
+- Dialog modals (desktop)
+
+RESPONSIVE BREAKPOINTS:
+- Mobile: default
+- sm: 640px
+- md: 768px
+- lg: 1024px
+- xl: 1280px
+
+================================================================================
+                      13. STYLING DAN TEMA
+================================================================================
+
+GLOBAL CSS VARIABLES (index.css):
+:root {
+  --background: 0 0% 100%
+  --foreground: 0 0% 10%
+  --card: 0 0% 100%
+  --card-foreground: 0 0% 10%
+  --primary: 142 76% 36% (Green)
+  --primary-foreground: 0 0% 100%
+  --secondary: 142 76% 96%
+  --secondary-foreground: 0 0% 10%
+  --muted: 0 0% 96%
+  --muted-foreground: 0 0% 45%
+  --accent: 142 76% 36%
+  --accent-foreground: 0 0% 100%
+  --destructive: 0 72% 51%
+  --destructive-foreground: 0 0% 98%
+  --border: 220 13% 88%
+  --input: 220 13% 88%
+  --ring: 220 70% 45%
+  --radius: 1rem
+}
+
+THEMING:
+- Light mode only (mobile-first)
+- Green dominant theme
+- White backgrounds
+- Modern shadows
+- Consistent radius
+
+BUTTON STYLES (button.tsx):
+Variants:
+- default: Green background, hover darken
+- destructive: Red background
+- outline: Border only
+- secondary: Light gray
+- ghost: Hover background
+- link: Text underline
+
+Sizes:
+- default: h-10
+- sm: h-9
+- lg: h-11
+- icon: h-10 w-10
+- full: w-full
+
+Animations:
+- Hover: scale-[1.02], shadow-lg
+- Active: scale-[0.98], shadow-sm
+- Transition: duration-200
+
+CARD STYLES:
+- White background
+- Border-2 (green theme)
+- Shadow-sm
+- Hover: shadow-md
+- Rounded-2xl
+
+INPUT STYLES:
+- Border-gray-300
+- Focus: border-blue-500, ring-blue-200
+- Rounded-xl
+- h-12 height
+
+DIALOG STYLES:
+- max-w-[600px] (mobile: 95vw)
+- max-h-[85vh]
+- Overflow-y-auto
+- Top positioning mobile, center desktop
+- White background
+- Border-gray-200
+
+CUSTOM ANIMATIONS:
+- animate-float: Floating background blobs
+- animate-pulse: Pulsing effects
+- animate-bounce-in: Bounce in
+- animate-slide-up: Slide up
+- animate-shimmer: Shimmer effect
+
+================================================================================
+                       14. HOOKS KUSTOM
+================================================================================
+
+A. useAuth.tsx
+   - Authentication state management
+   - Session handling
+   - Version checking
+   - Sign in/sign out
+
+B. useUserRole.tsx
+   - Role detection (admin/mitra/user)
+   - Profile fetching
+   - Permission checks
+
+C. useSupabaseData.tsx
+   - Data fetching dari Supabase
+   - Real-time subscriptions
+   - Tagihan operations
+   - Settings management
+
+D. useAdminData.tsx
+   - Admin-specific data fetching
+   - All users data
+   - All tagihans (filterable)
+   - Profiles management
+
+E. useTagihanOperations.tsx
+   - Tagihan CRUD operations
+   - Error handling
+   - Toast notifications
+   - Optimistic updates
+
+F. useAutoCleanup.tsx
+   - Auto cleanup old paid bills
+   - Configurable cleanup period
+   - Runs on mount
+
+G. useGlobalSisaSaldo.tsx
+   - Calculate global remaining balance
+   - Considers all users
+   - Real-time updates
+
+H. useProfit.tsx
+   - Calculate profit
+   - Commission calculation
+   - Bonus calculation
+
+I. useUserPermissions.tsx
+   - Check user permissions
+   - Returns: canEdit, canDelete, canLunas
+   - Based on profile settings
+
+J. useDepositDate.tsx
+   - Deposit date management
+   - Format dates
+   - Calculate days until deposit
+
+K. use-toast.ts
+   - Toast notifications
+   - Sonner integration
+   - Custom toast variants
+
+L. useModernNotification.tsx
+   - Custom notification system
+   - Loading notifications
+   - Success notifications
+   - Auto-dismiss
+
+M. use-mobile.tsx
+   - Mobile device detection
+   - Responsive checks
+
+================================================================================
+                    15. INTEGRASI SUPABASE
+================================================================================
+
+CLIENT INITIALIZATION (integrations/supabase/client.ts):
+- Supabase client setup
+- Environment variables (supabase URL, anon key)
+- Singleton pattern
+
+TABLES:
+
+1. profiles
+   - user_id (UUID, primary key)
+   - full_name (text)
+   - username (text, unique)
+   - role (text: admin/mitra/user)
+   - can_edit_data (boolean)
+   - can_delete_data (boolean)
+   - can_lunas_data (boolean)
+   - created_at (timestamp)
+   - updated_at (timestamp)
+
+2. tagihan
+   - id (UUID, primary key)
+   - nama (text)
+   - jumlah (numeric)
+   - status (text: belum_lunas/lunas)
+   - user_id (UUID, foreign key)
+   - nama_input (text)
+   - nama_lunas (text)
+   - created_at (timestamp)
+   - updated_at (timestamp)
+   - deleted_at (timestamp, nullable)
+
+3. settings
+   - id (UUID, primary key)
+   - user_id (UUID, foreign key)
+   - saldo_awal (numeric)
+   - created_at (timestamp)
+   - updated_at (timestamp)
+
+4. pending_registrations
+   - id (UUID, primary key)
+   - full_name (text)
+   - username (text, unique)
+   - password_hash (text)
+   - status (text: pending/approved/rejected)
+   - created_at (timestamp)
+
+5. deposit_dates
+   - id (UUID, primary key)
+   - user_id (UUID, foreign key)
+   - deposit_date (date)
+   - created_at (timestamp)
+   - updated_at (timestamp)
+
+6. messages
+   - id (UUID, primary key)
+   - from_user_id (UUID)
+   - to_user_id (UUID)
+   - message (text)
+   - created_at (timestamp)
+   - read (boolean)
+
+REAL-TIME SUBSCRIPTIONS:
+- Tagihan table: INSERT, UPDATE, DELETE
+- Settings table: INSERT, UPDATE
+- Profiles table: INSERT, UPDATE
+- Unique channel per user to avoid conflicts
+
+ROW LEVEL SECURITY (RLS):
+- User dapat hanya melihat data sendiri
+- Admin dapat melihat semua data
+- Mitra limited ke own data
+
+================================================================================
+                      16. FITUR TAMBAHAN
+================================================================================
+
+A. CEK TAGIHAN PUBLIK
+   - Tanpa login
+   - Search by nama (partial match)
+   - Show active dan paid bills
+   - Grouped display
+   - Total per group
+
+B. USER COLOR GENERATOR (lib/userColors.ts)
+   - Generate consistent color per username
+   - Hash-based color selection
+   - Used untuk user badges
+
+C. FORMATTING UTILITIES:
+   - Currency formatting (IDR)
+   - Date formatting (Indonesian locale)
+   - Number formatting (Indonesian: 1.000.000)
+
+D. SCREENSHOT CAPABILITY:
+   - html2canvas integration
+   - Capture invoice as image
+   - Download/screenshot functionality
+
+E. AUTO-REFRESH:
+   - Real-time data sync
+   - Auto-refresh on changes
+   - Query invalidation
+
+F. LOADING STATES:
+   - Loading screen dengan progress
+   - Skeleton loaders
+   - Spinner animations
+
+G. ERROR HANDLING:
+   - Toast error notifications
+   - Try-catch blocks
+   - User-friendly error messages
+
+H. VALIDATION:
+   - Form validation
+   - Required fields
+   - Password matching
+   - Minimum length checks
+
+I. MOTIVATIONAL MESSAGES:
+   - Random motivational quotes
+   - Time-based greeting
+   - Encouraging messages
+
+J. VERSION CONTROL:
+   - App version tracking
+   - Force re-login on update
+   - Version mismatch handling
+
+================================================================================
+                      17. ALUR PENGGUNA
+================================================================================
+
+ALUR LOGIN:
+1. User buka aplikasi
+2. Redirect ke /auth (jika belum login)
+3. Landing page ditampilkan
+4. User klik "Login Aplikasi"
+5. Masukkan username dan password
+6. Email constructed: {username}@syakirdigital.local
+7. Sign in ke Supabase
+8. On success: Redirect ke dashboard sesuai role
+   - Admin → AdminDashboard
+   - Mitra → MitraDashboard
+   - User biasa → Index
+
+ALUR REGISTRASEL RESELLER:
+1. User klik "Daftar Jadi Reseller"
+2. Isi form: Full name, username, password, confirm password
+3. Check terms agreement
+4. Submit registration
+5. Check duplicate username
+6. Insert ke pending_registrations
+7. Show success screen
+8. Admin approves di PendingRegistrations
+9. Admin creates Supabase auth user
+10. Admin inserts ke profiles table
+11. User dapat login
+
+ALUR TAMBAH TAGIHAN:
+1. User klik "Tambah Tagihan" di BottomNav
+2. Dialog terbuka
+3. Isi nama dan jumlah
+4. Click "Tambah Tagihan"
+5. Loading notification (2 seconds)
+6. Success notification
+7. Tagihan muncul di TagihanAktif
+8. Saldo terupdate
+
+ALUR BAYAR LANGSUNG:
+1. User klik floating button "Bayar Langsung"
+2. Dialog terbuka
+3. Isi nama dan jumlah
+4. Jumlah auto-format (Indonesian)
+5. Click submit
+6. Data masuk ke TagihanLunas
+7. Toast notification
+8. Saldo terupdate
+
+ALUR MARK LUNAS:
+1. User buka TagihanAktif
+2. Klik tombol check pada tagihan
+3. Confirmation dialog terbuka
+4. Konfirmasi lunas
+5. Status berubah ke 'lunas'
+6. Tagihan pindah ke TagihanLunas
+7. nama_lunas di-set
+8. Saldo terupdate
+
+ALUR GENERATE INVOICE:
+1. User klik tombol invoice pada group tagihan
+2. InvoiceDialog terbuka
+3. InvoicePrintable ditampilkan
+4. User dapat edit keterangan
+5. User dapat tambah items
+6. Klik screenshot untuk download
+7. Invoice siap
+
+ALUR EDIT TAGIHAN:
+1. User klik tombol edit pada tagihan
+2. Inline edit mode aktif
+3. Edit nama dan/atau jumlah
+4. Click save
+5. Tagihan terupdate
+6. Saldo ter-recalculate
+
+ALUR DELETE TAGIHAN:
+1. User klik tombol trash pada tagihan
+2. Confirmation dialog
+3. Confirm delete
+4. Tagihan soft-deleted (deleted_at set)
+5. Pindah ke DeletedTagihan
+6. Dapat di-restore
+
+ALUR ADMIN APPROVE REGISTRATION:
+1. Admin buka Admin Menu
+2. Klik "Pending Registrations"
+3. List pending registrations ditampilkan
+4. Klik "Approve" pada registration
+5. Dialog konfirmasi
+6. System creates Supabase auth user
+7. System inserts ke profiles table
+8. Delete dari pending_registrations
+9. User dapat login
+
+ALUR ADMIN MANAGE USER:
+1. Admin buka Admin Menu
+2. Klik "User Management"
+3. List users ditampilkan
+4. Add/Edit/Delete user
+5. Set permissions (can_edit, can_delete, can_lunas)
+6. Change role
+7. Reset password
+
+================================================================================
+                18. KONFIGURASI DAN ENVIRONMENT
+================================================================================
+
+ENVIRONMENT VARIABLES (.env):
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+
+SCRIPTS (package.json):
+- npm run dev: Start development server (Vite)
+- npm run build: Build for production
+- npm run build:dev: Build for development mode
+- npm run lint: Run ESLint
+- npm run preview: Preview production build
+
+VITE CONFIG:
+- Build target: esnext
+- React plugin: @vitejs/plugin-react-swc
+- TypeScript support
+- Path aliases: @/* → src/*
+
+TAILWIND CONFIG:
+- Content paths: ./index.html, ./src/**/*.{js,ts,jsx,tsx}
+- Theme: Custom CSS variables
+- Plugins: tailwindcss-animate
+
+TYPE SCRIPT CONFIG:
+- Target: ES2020
+- Module: ESNext
+- Strict: true
+- Path aliases: @/* → ./src/*
+
+BUILD OUTPUT:
+- dist/ folder
+- Optimized production build
+- Minified CSS and JS
+- Hashed filenames for caching
+
+DEPLOYMENT:
+- Can be deployed ke Vercel, Netlify, or any static hosting
+- Requires Supabase backend
+- Environment variables must be set
+- No server-side rendering (SPA)
+
+================================================================================
+                            END OF DOCUMENTATION
+================================================================================
+
+Dokumentasi ini mencakup seluruh fitur, komponen, dan fungsionalitas aplikasi
+Syakir Digital versi 2.0.0. Untuk informasi lebih lanjut atau pertanyaan,
+silakan hubungi tim pengembang.
+
+Last Updated: 08 Mei 2026
