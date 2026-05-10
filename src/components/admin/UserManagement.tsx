@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { createUser, deleteUser, updateUser } from '@/lib/edgeFunctions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -142,9 +141,17 @@ export const UserManagement = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await createUser(fullName, username, password, role);
+      const { data, error } = await supabase.functions.invoke('manage-users', {
+        body: {
+          action: 'create',
+          fullName,
+          username,
+          password,
+          role,
+        },
+      });
 
-      if (error) throw new Error(error.message);
+      if (error) throw error;
       if (!data?.success) throw new Error(data?.error || 'User creation failed');
 
       toast({
@@ -172,9 +179,14 @@ export const UserManagement = () => {
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      const { data, error } = await deleteUser(userId);
+      const { data, error } = await supabase.functions.invoke('manage-users', {
+        body: {
+          action: 'delete',
+          userId,
+        },
+      });
 
-      if (error) throw new Error(error.message);
+      if (error) throw error;
       if (!data?.success) throw new Error(data?.error || 'User deletion failed');
 
       toast({
